@@ -1,5 +1,6 @@
 package com.example.inventari;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -26,7 +27,11 @@ import com.google.firebase.ml.vision.barcode.FirebaseVisionBarcodeDetectorOption
 import com.google.firebase.ml.vision.common.FirebaseVisionImage;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +39,7 @@ import java.util.List;
 public class ProductActivity extends AppCompatActivity {
 
     private static final String TAG = "desenvolupament";
+    static final int REQUEST_TAKE_PHOTO = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,7 @@ public class ProductActivity extends AppCompatActivity {
         imageButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // TODO Check if mCurrentPhotoPath exists and delete if exists
                 dispatchTakePictureIntent();
             }
         });
@@ -53,6 +60,7 @@ public class ProductActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                // TODO delete mCurrentPhotoPath file and save code an quantity in a file
                 Intent intent = new Intent(ProductActivity.this, MainActivity.class);
                 startActivity(intent);
             }
@@ -61,37 +69,10 @@ public class ProductActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-//            barcodeRecognitionFromBitmap(data);
+        if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             barcodeRecognitionFromImage();
         }
     }
-
-    // Bitmap thumbnail
-
-    static final int REQUEST_IMAGE_CAPTURE = 1;
-    private void dispatchTakePictureIntentBitmap() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-        }
-    }
-
-    private void barcodeRecognitionFromBitmap(Intent data) {
-        // Get image bitmap
-        Bundle extras = data.getExtras();
-        Bitmap imageBitmap = (Bitmap) extras.get("data");
-        // Set image bitmap as a image button background
-        ImageButton imageButton = (ImageButton) findViewById(R.id.imageButton);
-        imageButton.setImageBitmap(imageBitmap);
-        // Processing barcode recognition
-        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
-
-        barcodeRecognition(image);
-    }
-
-
-    // Full image size
 
     String mCurrentPhotoPath;
     private File createImageFile() throws IOException {
@@ -102,7 +83,7 @@ public class ProductActivity extends AppCompatActivity {
         File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
+                ".jpg",   /* suffix */
                 storageDir      /* directory */
         );
 
@@ -111,7 +92,6 @@ public class ProductActivity extends AppCompatActivity {
         return image;
     }
 
-    static final int REQUEST_TAKE_PHOTO = 1;
     private void dispatchTakePictureIntent() {
         Log.v(TAG, "Entrm a dispatchTakePictureIntent");
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
