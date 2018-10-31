@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -52,42 +51,14 @@ public class ProductActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
+            // Get image bitmap
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
+            // Set image bitmap as a image button background
             ImageButton imageButton = (ImageButton) findViewById(R.id.imageButton);
             imageButton.setImageBitmap(imageBitmap);
-
-            FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
-            FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
-                    .getVisionBarcodeDetector();
-
-            // Extract barcode from image
-            Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
-                    .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
-                        @Override
-                        public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
-                            // Toast with success
-                            Snackbar.make(getWindow().getDecorView(),"Codi de barres detectat: " + barcodes.size(), Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                            // Add barcode in code text input
-                            for (FirebaseVisionBarcode barcode: barcodes) {
-                                String rawValue = barcode.getRawValue();
-                                EditText codeEditText = (EditText) findViewById(R.id.codeEditText);
-                                codeEditText.setText(rawValue);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            // Toast with error
-                            Snackbar.make(getWindow().getDecorView(),"No s'ha pogut reconeixer el codi de barres", Snackbar.LENGTH_LONG)
-                                    .setAction("Action", null).show();
-                        }
-                    });
-
-            EditText quantityEditText = (EditText) findViewById(R.id.quantityEditText);
-            quantityEditText.requestFocus();
+            // Processing barcode recognition
+            barcodeRecognitionFromBitmap(imageBitmap);
         }
     }
 
@@ -97,6 +68,45 @@ public class ProductActivity extends AppCompatActivity {
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
         }
+    }
+
+    private void barcodeRecognitionFromBitmap(Bitmap imageBitmap) {
+        FirebaseVisionImage image = FirebaseVisionImage.fromBitmap(imageBitmap);
+        FirebaseVisionBarcodeDetector detector = FirebaseVision.getInstance()
+                .getVisionBarcodeDetector();
+
+        // Extract barcode from image
+        Task<List<FirebaseVisionBarcode>> result = detector.detectInImage(image)
+                .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionBarcode>>() {
+                    @Override
+                    public void onSuccess(List<FirebaseVisionBarcode> barcodes) {
+                        if (barcodes.size() == 0) {
+                            Snackbar.make(getWindow().getDecorView(),"No s'ha detectat cap codi de barres", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                        } else {
+                            // Toast with success
+                            Snackbar.make(getWindow().getDecorView(),"S'han detectat " + barcodes.size() + " codis de barres", Snackbar.LENGTH_LONG)
+                                    .setAction("Action", null).show();
+                            // Add barcode in code text input
+                            for (FirebaseVisionBarcode barcode: barcodes) {
+                                String rawValue = barcode.getRawValue();
+                                EditText codeEditText = (EditText) findViewById(R.id.codeEditText);
+                                codeEditText.setText(rawValue);
+                            }
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Toast with error
+                        Snackbar.make(getWindow().getDecorView(),"No s'ha pogut reconeixer el codi de barres", Snackbar.LENGTH_LONG)
+                                .setAction("Action", null).show();
+                    }
+                });
+
+        EditText quantityEditText = (EditText) findViewById(R.id.quantityEditText);
+        quantityEditText.requestFocus();
     }
 
 }
