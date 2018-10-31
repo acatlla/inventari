@@ -1,5 +1,6 @@
 package com.example.inventari;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -11,7 +12,16 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.TextView;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -32,6 +42,29 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        String filename = "inventari.csv";
+        FileInputStream inputStream;
+        int character;
+        StringBuffer stringBuffer = new StringBuffer();
+
+        try {
+            inputStream = openFileInput(filename);
+            while((character = inputStream.read()) != -1) {
+                stringBuffer.append((char)character);
+            }
+            inputStream.close();
+            String[] products = stringBuffer.toString().split("\n");
+            TextView productCounter = (TextView) findViewById(R.id.productCounter);
+            productCounter.setText(products.length + " productes");
+
+            final ListView listview = (ListView) findViewById(R.id.productList);
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                    android.R.layout.simple_list_item_1, products);
+            listview.setAdapter(adapter);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

@@ -60,7 +60,8 @@ public class ProductActivity extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                // TODO delete mCurrentPhotoPath file and save code an quantity in a file
+                // TODO delete mCurrentPhotoPath file
+                saveProduct();
                 Intent intent = new Intent(ProductActivity.this, MainActivity.class);
                 startActivity(intent);
             }
@@ -179,6 +180,25 @@ public class ProductActivity extends AppCompatActivity {
 
         EditText quantityEditText = (EditText) findViewById(R.id.quantityEditText);
         quantityEditText.requestFocus();
+    }
+
+    // Save product
+    private void saveProduct() {
+        EditText codeEditText = (EditText) findViewById(R.id.codeEditText);
+        EditText quantityEditText = (EditText) findViewById(R.id.quantityEditText);
+        String barcode = codeEditText.getText().toString();
+        String quantity = quantityEditText.getText().toString();
+
+        String fileContents = barcode + ',' + quantity + '\n';
+        String filename = "inventari.csv";
+        FileOutputStream outputStream;
+        try {
+            outputStream = openFileOutput(filename, Context.MODE_APPEND);
+            outputStream.write(fileContents.getBytes());
+            outputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
