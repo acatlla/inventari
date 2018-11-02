@@ -3,8 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.inventari.MainActivity">
     <item
+        android:id="@+id/action_export"
+        android:orderInCategory="100"
+        android:title="Exportar productes"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_clean"
+        android:orderInCategory="100"
+        android:title="Eliminar productes"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/action_settings"
         android:orderInCategory="100"
-        android:title="@string/action_settings"
+        android:title="Configuració"
         app:showAsAction="never" />
 </menu>

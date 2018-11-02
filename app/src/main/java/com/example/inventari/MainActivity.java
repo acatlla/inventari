@@ -82,10 +82,29 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            Snackbar.make(getWindow().getDecorView(),"Replace with your own action", Snackbar.LENGTH_LONG)
+        if (id == R.id.action_export) {
+            Snackbar.make(getWindow().getDecorView(),"Exportar productes encara no està implementat", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
 
+            return true;
+        } else if (id == R.id.action_clean) {
+            String filename = "inventari.csv";
+            FileOutputStream outputStream;
+            try {
+                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
+                outputStream.close();
+                // TODO update listview with empty products
+                Snackbar.make(getWindow().getDecorView(),"S'han eliminat els productes amb èxit", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            } catch (Exception e) {
+                Snackbar.make(getWindow().getDecorView(),"No s'han pogut eliminar els productes", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+                e.printStackTrace();
+            }
+            return true;
+        } else if (id == R.id.action_settings) {
+            Snackbar.make(getWindow().getDecorView(),"Configuració encara no està implementat", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
             return true;
         }
 
