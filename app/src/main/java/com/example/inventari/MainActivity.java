@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -22,10 +23,15 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.channels.FileChannel;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
 
     public static final String PRODUCT = "com.example.inventari.PRODUCT";
+    public static final String PRODUCTS_FILENAME = "inventari.csv";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,28 +49,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        String filename = "inventari.csv";
-        FileInputStream inputStream;
-        int character;
-        StringBuffer stringBuffer = new StringBuffer();
-
-        try {
-            inputStream = openFileInput(filename);
-            while((character = inputStream.read()) != -1) {
-                stringBuffer.append((char)character);
-            }
-            inputStream.close();
-            String[] products = stringBuffer.toString().split("\n");
-            TextView productCounter = (TextView) findViewById(R.id.productCounter);
-            productCounter.setText(products.length + " productes");
-
-            final ListView listview = (ListView) findViewById(R.id.productList);
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                    android.R.layout.simple_list_item_1, products);
-            listview.setAdapter(adapter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        displayProducts(PRODUCTS_FILENAME);
     }
 
     @Override
@@ -83,32 +68,51 @@ public class MainActivity extends AppCompatActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_export) {
-            Snackbar.make(getWindow().getDecorView(),"Exportar productes encara no està implementat", Snackbar.LENGTH_LONG)
+            Snackbar.make(getWindow().getDecorView(),"Encara no està implementat", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
-
             return true;
         } else if (id == R.id.action_clean) {
-            String filename = "inventari.csv";
-            FileOutputStream outputStream;
-            try {
-                outputStream = openFileOutput(filename, Context.MODE_PRIVATE);
-                outputStream.close();
-                // TODO update listview with empty products
-                Snackbar.make(getWindow().getDecorView(),"S'han eliminat els productes amb èxit", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            } catch (Exception e) {
-                Snackbar.make(getWindow().getDecorView(),"No s'han pogut eliminar els productes", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-                e.printStackTrace();
-            }
+            Snackbar.make(getWindow().getDecorView(),"Encara no està implementat", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show();
             return true;
         } else if (id == R.id.action_settings) {
-            Snackbar.make(getWindow().getDecorView(),"Configuració encara no està implementat", Snackbar.LENGTH_LONG)
+            Snackbar.make(getWindow().getDecorView(),"Encara no està implementat", Snackbar.LENGTH_LONG)
                     .setAction("Action", null).show();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void displayProducts(String filename){
+        String[] products = getProducts(filename);
+        // Display products counter
+        TextView productCounter = (TextView) findViewById(R.id.productCounter);
+        productCounter.setText(products.length + " productes");
+        // Display products list
+        final ListView listview = (ListView) findViewById(R.id.productList);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
+                android.R.layout.simple_list_item_1, products);
+        listview.setAdapter(adapter);
+    }
+
+    private String[] getProducts(String filename){
+        String[] products = {};
+        FileInputStream inputStream;
+        int character;
+        StringBuffer stringBuffer = new StringBuffer();
+
+        try {
+            inputStream = openFileInput(filename);
+            while((character = inputStream.read()) != -1) {
+                stringBuffer.append((char)character);
+            }
+            inputStream.close();
+            products = stringBuffer.toString().split("\n");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return products;
     }
 
 }
