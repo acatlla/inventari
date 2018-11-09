@@ -1,6 +1,7 @@
 package com.example.inventari;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -8,6 +9,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -49,7 +51,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        displayProducts(PRODUCTS_FILENAME);
+        displayProducts();
     }
 
     @Override
@@ -72,8 +74,7 @@ public class MainActivity extends AppCompatActivity {
                     .setAction("Action", null).show();
             return true;
         } else if (id == R.id.action_clean) {
-            Snackbar.make(getWindow().getDecorView(),"Encara no està implementat", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show();
+            cleanProducts();
             return true;
         } else if (id == R.id.action_settings) {
             Snackbar.make(getWindow().getDecorView(),"Encara no està implementat", Snackbar.LENGTH_LONG)
@@ -84,8 +85,8 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void displayProducts(String filename){
-        String[] products = getProducts(filename);
+    private void displayProducts(){
+        String[] products = getProducts(PRODUCTS_FILENAME);
         // Display products counter
         TextView productCounter = (TextView) findViewById(R.id.productCounter);
         productCounter.setText(products.length + " productes");
@@ -94,6 +95,48 @@ public class MainActivity extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
                 android.R.layout.simple_list_item_1, products);
         listview.setAdapter(adapter);
+    }
+
+    private void cleanProducts(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setTitle("Eliminar productes");
+        builder.setMessage("S'eliminaran tots els productes. Estas segur d'eliminar-los?");
+
+        builder.setPositiveButton("Acceptar", new DialogInterface.OnClickListener() {
+
+            public void onClick(DialogInterface dialog, int which) {
+
+                FileOutputStream outputStream;
+                try {
+                    outputStream = openFileOutput(PRODUCTS_FILENAME, Context.MODE_PRIVATE);
+                    outputStream.close();
+                    Snackbar.make(getWindow().getDecorView(),"S'han eliminat els productes amb èxit", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                } catch (Exception e) {
+                    Snackbar.make(getWindow().getDecorView(),"No s'han pogut eliminar els productes", Snackbar.LENGTH_LONG)
+                            .setAction("Action", null).show();
+                    e.printStackTrace();
+                } finally {
+                    displayProducts();
+                }
+
+                dialog.dismiss();
+            }
+
+        });
+
+        builder.setNegativeButton("Cancelar", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // I do not need any action here you might
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     private String[] getProducts(String filename){
@@ -108,7 +151,9 @@ public class MainActivity extends AppCompatActivity {
                 stringBuffer.append((char)character);
             }
             inputStream.close();
-            products = stringBuffer.toString().split("\n");
+            if (stringBuffer.length() > 0) {
+                products = stringBuffer.toString().split("\n");
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
